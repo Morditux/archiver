@@ -8,6 +8,7 @@ var (
 	compress = flag.Bool("c", false, "Compress files")
 	name     = flag.String("n", "", "Name of the archive")
 	source   = flag.String("s", "", "Source directory")
+	verbose  = flag.Bool("v", false, "Verbose output")
 )
 
 func main() {
@@ -24,7 +25,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-	archiver := NewArchiver(*source, *days, *delete, *compress, *name)
+	archiver := NewArchiver(*source, *days, *delete, *compress, *name, *verbose)
 	err := archiver.Archive()
 	if err != nil {
 		println(err.Error())

@@ -13,13 +13,14 @@ type Archiver struct {
 	Days     int
 	Delete   bool
 	Compress bool
+	Verbose  bool
 	Name     string
 }
 
 var ToDelete = []string{}
 
-func NewArchiver(source string, days int, delete bool, compress bool, name string) *Archiver {
-	return &Archiver{Source: source, Days: days, Delete: delete, Compress: compress, Name: name}
+func NewArchiver(source string, days int, delete bool, compress bool, name string, verbose bool) *Archiver {
+	return &Archiver{Source: source, Days: days, Delete: delete, Compress: compress, Name: name, Verbose: verbose}
 }
 
 func (a *Archiver) Archive() error {
@@ -55,7 +56,9 @@ func (a *Archiver) Archive() error {
 			if len(path) > 0 && path[0] == '/' {
 				zpath = path[1:]
 			}
-			println(zpath)
+			if a.Verbose {
+				println(zpath)
+			}
 			header.Name = zpath
 
 			// Set the compression method to the one specified
@@ -94,18 +97,24 @@ func (a *Archiver) Archive() error {
 				//}
 			}
 		}
-		// Delete the file if specified
-		if a.Delete {
-			a.DeleteFiles()
-		}
 		return nil
 	})
+	// Delete the file if specified
+	if a.Delete {
+		err = a.DeleteFiles()
+		if err != nil {
+			return err
+		}
+	}
 
 	return err
 }
 
 func (a *Archiver) DeleteFiles() error {
 	for _, path := range ToDelete {
+		if a.Verbose {
+			println("Deleting: " + path)
+		}
 		err := os.Remove(path)
 		if err != nil {
 			return err
